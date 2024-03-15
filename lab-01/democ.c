@@ -7,7 +7,8 @@
 #include <stdlib.h>
 
 /* Definición de una estructura de datos. */
-struct punto {
+struct punto
+{
     int x;
     int y;
 };
@@ -41,13 +42,13 @@ int cuadrado(int x)
  *
  * Probar invocar el programa de esta manera: ./democ 1
  */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     /* Estas son variables locales de la función main(). */
-    char var1 = 65;                 // byte (8 bits)
-    int var2 = 2023;                // Entero
-    float var3 = 0.101f;            // Punto flotante
-    double var4 = 3.1415926535;     // Punto flotante (mayor precisión)
+    char var1 = 65;             // byte (8 bits)
+    int var2 = 2023;            // Entero
+    float var3 = 0.101f;        // Punto flotante
+    double var4 = 3.1415926535; // Punto flotante (mayor precisión)
 
     /* Variable de tipo struct punto */
     struct punto punto;
@@ -56,7 +57,7 @@ int main(int argc, char* argv[])
     punto.y = 10;
 
     /* Actualiza el valor de la variable global. */
-    variable_global = 0xAB;     
+    variable_global = 0xAB;
 
     /* Invoca una función y guardamos el resultado en una variable. */
     int potencia = cuadrado(var2);
@@ -65,7 +66,8 @@ int main(int argc, char* argv[])
     puts("hola mundo!");
 
     /* Condicionales */
-    if (argc > 1) {
+    if (argc > 1)
+    {
         // Hay al menos un parámetro (el nombre del programa es el 1er parametro).
         // %s indica que se imprime una cadena
         printf("Parametro %s\n", argv[1]);
@@ -79,12 +81,15 @@ int main(int argc, char* argv[])
      */
     printf("%X\n%c\n%d\n%2.4f\n%2.8f\n", variable_global, var1, var2, var3, var4);
     printf("var2^2 %d\n", potencia);
-    printf("var3^2 %d\n", cuadrado(var3));  // !!! Perdida de precisión (¿por que?)
+    printf("var3^2 %d\n", cuadrado(var3)); // !!! Perdida de precisión (¿por que?)
 
     /* Uso de la estructura */
-    if (punto.x > punto.y) {
+    if (punto.x > punto.y)
+    {
         puts("Eje X");
-    } else {
+    }
+    else
+    {
         puts("Eje Y");
     }
 
@@ -92,28 +97,30 @@ int main(int argc, char* argv[])
     int i = 0;
 
     /* Ejecuta repetidamente el bloque hasta que la condición de while() sea falsa. */
-    while (i < 5) {
+    while (i < 5)
+    {
         printf("while %d\n", i);
-        i++;    // equivalente a i = i + 1
+        i++; // equivalente a i = i + 1
     }
 
     /* Ejecuta repetidamente el bloque el número de veces indicado. */
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 5; i++)
+    {
         printf("for %d\n", arreglo[i]);
     }
 
-    char* p; /* Puntero a una variable de tipo entero. */
+    char *p; /* Puntero a una variable de tipo entero. */
 
     p = &var1;
 
     printf("Dirección de memoria de var1: %p\n", &var1);
-    printf("Dirección de memoria de p: %p\n", (void*) &p);
+    printf("Dirección de memoria de p: %p\n", (void *)&p);
     printf("Valor de la variable p: %p\n", p);
     printf("Valor de la variable a la que apunta p: %c\n", *p); // ---> ¿Por qué imprime 'A'?
 
     /* malloc(): funcion de librería que reserva memoria dinamicamente */
     /* Reservamos 1 KiB (1024 bytes) */
-    p = (char*) malloc(sizeof(char) * 1024);
+    p = (char *)malloc(sizeof(char) * 1024);
 
     /* free(): función de librería que libera memoria */
     free(p);
@@ -126,11 +133,10 @@ int main(int argc, char* argv[])
     /* Otra alternativa, es utilizar la función de biblioteca exit(). Se debe
      * incluir el header <stdlib.h>.
      *
-     * exit(EXIT_SUCCESS) en caso de que la ejecución finalice de manera 
+     * exit(EXIT_SUCCESS) en caso de que la ejecución finalice de manera
      * correcta o exit(EXIT_FAILURE) en caso contrario.
      *
      * La ventaja de usar exit() es que se pueden especificar handlers que
      * se ejecuten antes de que el programa finalice.
      */
 }
-
