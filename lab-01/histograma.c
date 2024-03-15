@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #define MAXIMA_LONGITUD 10
+
+int esPalabra(int ch)
+{
+    return ch != '\t' && ch != ' ';
+}
 
 int main(int argc, char *argv[])
 {
@@ -10,22 +14,22 @@ int main(int argc, char *argv[])
 
     while ((ch = getchar()) != EOF)
     {
-        if (isalpha(ch))
+        if (esPalabra(ch))
             longitudPalabra++;
-        else if (longitudPalabra > 0)
+        else
         {
             if (longitudPalabra <= MAXIMA_LONGITUD)
                 palabras[longitudPalabra]++;
             longitudPalabra = 0;
         }
     }
-
+    
     for (int i = 1; i <= MAXIMA_LONGITUD; i++)
     {
         printf("%d ", i);
-        for (int j = 0; j < palabras[i]; j++)
-            printf("*");
-        printf("\n");
+        for (int j = 0; j < palabras[i - 1]; j++)
+            putchar('*');
+        putchar('\n');
     }
 
     exit(EXIT_SUCCESS);
