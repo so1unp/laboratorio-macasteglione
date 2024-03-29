@@ -9,6 +9,11 @@
 
 int trace;
 
+int sys_answer(void)
+{
+  return 42;
+}
+
 int
 sys_fork(void)
 {
