@@ -3,9 +3,10 @@
 
 #define MAXIMA_LONGITUD 10
 
-int main(int argc, char *argv[])
+int main()
 {
-    int palabras[MAXIMA_LONGITUD] = {0}, ch, longitudPalabra = 0;
+    int palabras[MAXIMA_LONGITUD] = {0}, longitudPalabra = 0; 
+    int ch, i, j;
 
     while ((ch = getchar()) != EOF)
     {
@@ -19,10 +20,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    for (int i = 1; i < MAXIMA_LONGITUD; i++)
+    for (i = 1; i < MAXIMA_LONGITUD; i++)
     {
         printf("%d ", i);
-        for (int j = 0; j < palabras[i]; j++)
+        for (j = 0; j < palabras[i]; j++)
             putchar('*');
         putchar('\n');
     }
