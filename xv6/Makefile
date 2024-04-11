@@ -191,6 +191,8 @@ UPROGS=\
 	_uthread\
 	_answer\
 	_trace\
+	_pscnt\
+	_getppid\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

@@ -9,11 +9,6 @@
 
 int trace;
 
-int sys_pscnt(void)
-{
-  return 0;
-}
-
 int sys_getppid(void)
 {
   return myproc()->parent->pid;

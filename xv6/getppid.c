@@ -1,5 +1,5 @@
 /*
- * Invoca la llamada al sistema pscnt().
+ * Invoca la llamada al sistema getppid().
  */
 #include "types.h"
 #include "user.h"
@@ -8,6 +8,6 @@
 int main(void)
 {
     // Descomentar una vez implementada la llamada al sistema.
-    printf(1, "%d\n", pscnt());
+    printf(1, "%d\n", getppid());
     exit();
 }
