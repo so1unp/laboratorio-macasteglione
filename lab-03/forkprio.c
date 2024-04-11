@@ -37,18 +37,17 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        if (hijos[i] > 0)
+        if (hijos[i] == 0)
         {
             getrusage(RUSAGE_SELF, &usage);
             (prioReduce) ? nice(i) : nice(0);
             printf("Child %d (nice %2d):\t%3li\n", getpid(), getpriority(PRIO_PROCESS, (id_t)getpid()), usage.ru_utime.tv_sec);
             busywork();
         }
-
     }
 
     sleep(tiempo);
-    
+
     for (i = 0; i < childs; i++)
         kill(hijos[i], SIGTERM);
 
