@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    sleep(tiempo);
+    (tiempo <= 0) ? (unsigned)pause() : sleep(tiempo);
 
     for (i = 0; i < childs; i++)
         kill(hijos[i], SIGTERM);

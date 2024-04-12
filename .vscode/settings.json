@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "*.rmd": "markdown",
+        "date.h": "c",
+        "user.h": "c",
+        "types.h": "c",
+        "proc.h": "c",
+        "mmu.h": "c",
+        "x86.h": "c",
+        "defs.h": "c",
+        "memlayout.h": "c",
+        "param.h": "c",
+        "spinlock.h": "c"
+    }
+}
