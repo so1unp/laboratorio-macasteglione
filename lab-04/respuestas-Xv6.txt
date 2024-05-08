@@ -1,0 +1,25 @@
+Trabajo Práctico 4 - Hilos y Planificación
+
+
+2. La instrucción popa se utiliza para restaurar los valores de los registros generales (EAX, EBX, ECX, EDX, ESI, EDI, EBP) 
+que se guardaron previamente en la pila mediante la instrucción pusha.
+
+Después de restaurar el puntero de pila con el valor almacenado en next_thread->sp, el contexto del nuevo hilo está en la pila, 
+justo después de los registros guardados por pusha. Entonces al ejecutar popa restaura los valores de los registros a los que 
+corresponden en el nuevo hilo, y al finalizar la ejecución de popa, la CPU comenzará a ejecutar instrucciones utilizando el 
+contexto del nuevo hilo.
+
+Después de popa, el flujo de ejecución continuará en el nuevo hilo (next_thread) con su contexto restaurado, ya que los registros 
+y el puntero de pila estarán configurados como estaban en el momento en que se realizó el cambio de contexto.
+
+3. Se utiliza una política de planificación cooperativa. Los hilos cooperan explícitamente para ceder el control de la CPU. 
+El hilo actual almacena su contexto en la pila y luego restaura el contexto del siguiente hilo. Esto indica que los hilos 
+están cooperando al permitir que otros hilos tomen el control.
+
+4. La limitación ocurre porque el bucle que busca el siguiente hilo runnable se detiene cuando encuentra un hilo runnable 
+diferente al hilo actual. Entonces si solo hay dos hilos y ninguno de ellos es el hilo actual, el bucle nunca se detendrá y el 
+tercer hilo nunca se ejecutará.
+
+Para solucionarlo hay que hacer que el bucle itere a través de todos los hilos, comenzando desde el índice del hilo actual y 
+utilizando la operación de módulo para garantizar que el índice se vuelva al principio del arreglo de hilos si llega el final. 
+De esta manera, el bucle busca a través de todos los hilos disponibles y seleccionará el siguiente hilo runnable.
