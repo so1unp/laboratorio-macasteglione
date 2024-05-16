@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <mqueue.h>
+#include <unistd.h>
+#include <string.h>
 
-#define USERNAME_MAXSIZE    15  // Máximo tamaño en caracteres del nombre del remitente.
-#define TXT_SIZE            100 // Máximo tamaño del texto del mensaje.
+#define USERNAME_MAXSIZE 15 // Máximo tamaño en caracteres del nombre del remitente.
+#define TXT_SIZE 100        // Máximo tamaño del texto del mensaje.
 
 /**
  * Estructura del mensaje:
  * - sender: nombre del usuario que envió el mensaje.
  * - text: texto del mensaje.
  */
-struct msg {
+struct msg
+{
     char sender[USERNAME_MAXSIZE];
     char text[TXT_SIZE];
 };
@@ -34,44 +38,65 @@ void usage(char *argv[])
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
+    if (argc < 2)
+    {
         usage(argv);
         exit(EXIT_FAILURE);
     }
 
-    if (argv[1][0] != '-') {
+    if (argv[1][0] != '-')
+    {
         usage(argv);
         exit(EXIT_FAILURE);
     }
 
     char option = argv[1][1];
+    mqd_t queue = NULL;
+    msg_t mensaje;
 
-    switch(option) {
-        case 's':
-            printf("Enviar %s a la cola %s\n", argv[3], argv[2]);
-            break;
-        case 'r':
-            printf("Recibe el primer mensaje en %s\n", argv[2]);
-            break;
-        case 'a':
-            printf("Imprimer todos los mensajes en %s\n", argv[2]);
-            break;
-        case 'l':
-            printf("Escucha indefinidamente por mensajes\n");
-            break;
-        case 'c':
-            printf("Crea la cola de mensajes %s\n", argv[2]);
-            break;
-        case 'd':
-            printf("Borra la cola de mensajes %s\n", argv[2]);
-            break;
-        case 'h':
-            usage(argv);
-            break;
-        default:
-            fprintf(stderr, "Comando desconocido: %s\n", argv[1]);
-            exit(EXIT_FAILURE);
+    switch (option)
+    {
+    case 's':
+        printf("Enviar %s a la cola %s\n", argv[3], argv[2]);
+
+        strcpy(mensaje.text, argv[3]);
+        getlogin_r(mensaje.sender, sizeof(mensaje.sender));
+
+        mq_send(queue, (char *)&mensaje, sizeof(mensaje.text), 1);
+        break;
+
+    case 'r':
+        printf("Recibe el primer mensaje en %s\n", argv[2]);
+        mq_receive(queue, (char *)&mensaje, sizeof(mensaje.text), (unsigned *)1);
+        break;
+
+    case 'a':
+        printf("Imprimer todos los mensajes en %s\n", argv[2]);
+        break;
+
+    case 'l':
+        printf("Escucha indefinidamente por mensajes\n");
+        break;
+
+    case 'c':
+        printf("Crea la cola de mensajes %s\n", argv[2]);
+        queue = mq_open(argv[2], O_CREAT, 0666, NULL);
+        break;
+
+    case 'd':
+        printf("Borra la cola de mensajes %s\n", argv[2]);
+        mq_unlink(argv[2]);
+        break;
+
+    case 'h':
+        usage(argv);
+        break;
+
+    default:
+        fprintf(stderr, "Comando desconocido: %s\n", argv[1]);
+        exit(EXIT_FAILURE);
     }
-    
+
+    mq_close(queue);
     exit(EXIT_SUCCESS);
 }
