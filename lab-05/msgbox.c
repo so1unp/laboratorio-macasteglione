@@ -3,6 +3,10 @@
 #include <mqueue.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <time.h>
 
 #define USERNAME_MAXSIZE 15 // Máximo tamaño en caracteres del nombre del remitente.
 #define TXT_SIZE 100        // Máximo tamaño del texto del mensaje.
@@ -36,6 +40,138 @@ void usage(char *argv[])
     fprintf(stderr, "\t-h imprime este mensaje.\n");
 }
 
+void crear_queue(const char *name)
+{
+    struct mq_attr attr;
+    attr.mq_flags = 0;
+    attr.mq_maxmsg = 10;
+    attr.mq_msgsize = sizeof(msg_t);
+    attr.mq_curmsgs = 0;
+
+    mqd_t mq = mq_open(name, O_CREAT | O_RDWR, 0666, &attr);
+
+    if (mq == (mqd_t)-1)
+    {
+        perror("mq_open");
+        exit(EXIT_FAILURE);
+    }
+
+    mq_close(mq);
+}
+
+void eliminar_queue(const char *name)
+{
+    if (mq_unlink(name) == -1)
+    {
+        perror("mq_unlink");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void enviar_mensaje(const char *name, const char *texto)
+{
+    mqd_t mq = mq_open(name, O_WRONLY);
+
+    if (mq == (mqd_t)-1)
+    {
+        perror("mq_open");
+        exit(EXIT_FAILURE);
+    }
+
+    msg_t mensaje;
+
+    if (getlogin_r(mensaje.sender, USERNAME_MAXSIZE) != 0)
+    {
+        perror("getlogin_r");
+        mq_close(mq);
+        exit(EXIT_FAILURE);
+    }
+
+    strncpy(mensaje.text, texto, TXT_SIZE - 1);
+    mensaje.text[TXT_SIZE - 1] = '\0';
+
+    if (mq_send(mq, (char *)&mensaje, sizeof(msg_t), 0) == -1)
+    {
+        perror("mq_send");
+        mq_close(mq);
+        exit(EXIT_FAILURE);
+    }
+
+    mq_close(mq);
+}
+
+void recibir_mensaje(const char *name)
+{
+    mqd_t mq = mq_open(name, O_RDONLY);
+
+    if (mq == (mqd_t)-1)
+    {
+        perror("mq_open");
+        exit(EXIT_FAILURE);
+    }
+
+    msg_t mensaje;
+
+    if (mq_receive(mq, (char *)&mensaje, sizeof(msg_t), NULL) == -1)
+    {
+        perror("mq_receive");
+        mq_close(mq);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("%s: %s\n", mensaje.sender, mensaje.text);
+
+    mq_close(mq);
+}
+
+void mostrar_mensajes_todos(const char *name)
+{
+    mqd_t mq = mq_open(name, O_RDONLY);
+
+    if (mq == (mqd_t)-1)
+    {
+        perror("mq_open");
+        exit(EXIT_FAILURE);
+    }
+
+    msg_t mensaje;
+
+    while (mq_receive(mq, (char *)&mensaje, sizeof(msg_t), NULL) != -1)
+        printf("%s: %s\n", mensaje.sender, mensaje.text);
+
+    if (errno != EAGAIN)
+        perror("mq_receive");
+
+    mq_close(mq);
+}
+
+void esperar_mensajes(const char *name)
+{
+    mqd_t mq = mq_open(name, O_RDONLY);
+
+    if (mq == (mqd_t)-1)
+    {
+        perror("mq_open");
+        exit(EXIT_FAILURE);
+    }
+
+    msg_t mensaje;
+
+    printf("Esperando mensajes en la cola %s..\n", name);
+    while (1)
+    {
+        if (mq_receive(mq, (char *)&mensaje, sizeof(msg_t), NULL) == -1)
+        {
+            perror("mq_receive");
+            mq_close(mq);
+            exit(EXIT_FAILURE);
+        }
+        printf("%s: %s\n", mensaje.sender, mensaje.text);
+    }
+
+    mq_close(mq);
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -51,41 +187,79 @@ int main(int argc, char *argv[])
     }
 
     char option = argv[1][1];
-    mqd_t queue = NULL;
-    msg_t mensaje;
 
     switch (option)
     {
     case 's':
         printf("Enviar %s a la cola %s\n", argv[3], argv[2]);
 
-        strcpy(mensaje.text, argv[3]);
-        getlogin_r(mensaje.sender, sizeof(mensaje.sender));
+        if (argc != 4)
+        {
+            usage(argv);
+            exit(EXIT_FAILURE);
+        }
 
-        mq_send(queue, (char *)&mensaje, sizeof(mensaje.text), 1);
+        enviar_mensaje(argv[2], argv[3]);
         break;
 
     case 'r':
         printf("Recibe el primer mensaje en %s\n", argv[2]);
-        mq_receive(queue, (char *)&mensaje, sizeof(mensaje.text), (unsigned *)1);
+
+        if (argc != 3)
+        {
+            usage(argv);
+            exit(EXIT_FAILURE);
+        }
+
+        recibir_mensaje(argv[2]);
         break;
 
     case 'a':
-        printf("Imprimer todos los mensajes en %s\n", argv[2]);
+        printf("Imprime todos los mensajes en %s\n", argv[2]);
+
+        if (argc != 3)
+        {
+            usage(argv);
+            exit(EXIT_FAILURE);
+        }
+
+        mostrar_mensajes_todos(argv[2]);
         break;
 
     case 'l':
         printf("Escucha indefinidamente por mensajes\n");
+
+        if (argc != 3)
+        {
+            usage(argv);
+            exit(EXIT_FAILURE);
+        }
+
+        esperar_mensajes(argv[2]);
         break;
 
     case 'c':
         printf("Crea la cola de mensajes %s\n", argv[2]);
-        queue = mq_open(argv[2], O_CREAT, 0666, NULL);
+
+        if (argc != 3)
+        {
+            usage(argv);
+            exit(EXIT_FAILURE);
+        }
+
+        crear_queue(argv[2]);
         break;
 
     case 'd':
         printf("Borra la cola de mensajes %s\n", argv[2]);
-        mq_unlink(argv[2]);
+
+        if (argc != 3)
+        {
+            usage(argv);
+            exit(EXIT_FAILURE);
+        }
+
+        eliminar_queue(argv[2]);
         break;
 
     case 'h':
@@ -94,9 +268,9 @@ int main(int argc, char *argv[])
 
     default:
         fprintf(stderr, "Comando desconocido: %s\n", argv[1]);
+        usage(argv);
         exit(EXIT_FAILURE);
     }
 
-    mq_close(queue);
     exit(EXIT_SUCCESS);
 }
