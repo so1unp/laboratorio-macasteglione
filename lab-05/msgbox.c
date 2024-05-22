@@ -40,7 +40,7 @@ void usage(char *argv[])
     fprintf(stderr, "\t-h imprime este mensaje.\n");
 }
 
-void crear_queue(const char *name)
+void crear_cola(const char *name)
 {
     struct mq_attr attr;
     attr.mq_flags = 0;
@@ -48,18 +48,18 @@ void crear_queue(const char *name)
     attr.mq_msgsize = sizeof(msg_t);
     attr.mq_curmsgs = 0;
 
-    mqd_t mq = mq_open(name, O_CREAT | O_RDWR, 0666, &attr);
+    mqd_t cola = mq_open(name, O_CREAT | O_RDWR, 0666, &attr);
 
-    if (mq == (mqd_t)-1)
+    if (cola == (mqd_t)-1)
     {
         perror("mq_open");
         exit(EXIT_FAILURE);
     }
 
-    mq_close(mq);
+    mq_close(cola);
 }
 
-void eliminar_queue(const char *name)
+void eliminar_cola(const char *name)
 {
     if (mq_unlink(name) == -1)
     {
@@ -70,9 +70,9 @@ void eliminar_queue(const char *name)
 
 void enviar_mensaje(const char *name, const char *texto)
 {
-    mqd_t mq = mq_open(name, O_WRONLY);
+    mqd_t cola = mq_open(name, O_WRONLY);
 
-    if (mq == (mqd_t)-1)
+    if (cola == (mqd_t)-1)
     {
         perror("mq_open");
         exit(EXIT_FAILURE);
@@ -83,28 +83,28 @@ void enviar_mensaje(const char *name, const char *texto)
     if (getlogin_r(mensaje.sender, USERNAME_MAXSIZE) != 0)
     {
         perror("getlogin_r");
-        mq_close(mq);
+        mq_close(cola);
         exit(EXIT_FAILURE);
     }
 
     strncpy(mensaje.text, texto, TXT_SIZE - 1);
     mensaje.text[TXT_SIZE - 1] = '\0';
 
-    if (mq_send(mq, (char *)&mensaje, sizeof(msg_t), 0) == -1)
+    if (mq_send(cola, (char *)&mensaje, sizeof(msg_t), 0) == -1)
     {
         perror("mq_send");
-        mq_close(mq);
+        mq_close(cola);
         exit(EXIT_FAILURE);
     }
 
-    mq_close(mq);
+    mq_close(cola);
 }
 
 void recibir_mensaje(const char *name)
 {
-    mqd_t mq = mq_open(name, O_RDONLY);
+    mqd_t cola = mq_open(name, O_RDONLY);
 
-    if (mq == (mqd_t)-1)
+    if (cola == (mqd_t)-1)
     {
         perror("mq_open");
         exit(EXIT_FAILURE);
@@ -112,23 +112,23 @@ void recibir_mensaje(const char *name)
 
     msg_t mensaje;
 
-    if (mq_receive(mq, (char *)&mensaje, sizeof(msg_t), NULL) == -1)
+    if (mq_receive(cola, (char *)&mensaje, sizeof(msg_t), NULL) == -1)
     {
         perror("mq_receive");
-        mq_close(mq);
+        mq_close(cola);
         exit(EXIT_FAILURE);
     }
 
     printf("%s: %s\n", mensaje.sender, mensaje.text);
 
-    mq_close(mq);
+    mq_close(cola);
 }
 
 void mostrar_mensajes_todos(const char *name)
 {
-    mqd_t mq = mq_open(name, O_RDONLY);
+    mqd_t cola = mq_open(name, O_RDONLY);
 
-    if (mq == (mqd_t)-1)
+    if (cola == (mqd_t)-1)
     {
         perror("mq_open");
         exit(EXIT_FAILURE);
@@ -136,20 +136,20 @@ void mostrar_mensajes_todos(const char *name)
 
     msg_t mensaje;
 
-    while (mq_receive(mq, (char *)&mensaje, sizeof(msg_t), NULL) != -1)
+    while (mq_receive(cola, (char *)&mensaje, sizeof(msg_t), NULL) != -1)
         printf("%s: %s\n", mensaje.sender, mensaje.text);
 
     if (errno != EAGAIN)
         perror("mq_receive");
 
-    mq_close(mq);
+    mq_close(cola);
 }
 
 void esperar_mensajes(const char *name)
 {
-    mqd_t mq = mq_open(name, O_RDONLY);
+    mqd_t cola = mq_open(name, O_RDONLY);
 
-    if (mq == (mqd_t)-1)
+    if (cola == (mqd_t)-1)
     {
         perror("mq_open");
         exit(EXIT_FAILURE);
@@ -160,16 +160,16 @@ void esperar_mensajes(const char *name)
     printf("Esperando mensajes en la cola %s..\n", name);
     while (1)
     {
-        if (mq_receive(mq, (char *)&mensaje, sizeof(msg_t), NULL) == -1)
+        if (mq_receive(cola, (char *)&mensaje, sizeof(msg_t), NULL) == -1)
         {
             perror("mq_receive");
-            mq_close(mq);
+            mq_close(cola);
             exit(EXIT_FAILURE);
         }
         printf("%s: %s\n", mensaje.sender, mensaje.text);
     }
 
-    mq_close(mq);
+    mq_close(cola);
 }
 
 int main(int argc, char *argv[])
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        crear_queue(argv[2]);
+        crear_cola(argv[2]);
         break;
 
     case 'd':
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-        eliminar_queue(argv[2]);
+        eliminar_cola(argv[2]);
         break;
 
     case 'h':
