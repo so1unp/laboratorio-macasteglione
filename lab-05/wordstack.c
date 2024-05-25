@@ -84,11 +84,39 @@ void crear_pila(const char *name)
 
 void borrar_pila(const char *name)
 {
+    int fd = shm_open(name, O_RDWR, 0666);
+
+    if (fd == -1)
+    {
+        perror("shm_open");
+        exit(EXIT_FAILURE);
+    }
+
+    wordstack_t *stack = mmap(NULL, sizeof(wordstack_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+    if (stack == MAP_FAILED)
+    {
+        perror("mmap");
+        exit(EXIT_FAILURE);
+    }
+
     if (shm_unlink(name) == -1)
     {
         perror("shm_unlink");
         exit(EXIT_FAILURE);
     }
+
+    sem_destroy(&stack->full);
+    sem_destroy(&stack->empty);
+    pthread_mutex_destroy(&stack->mutex);
+
+    if (munmap(stack, sizeof(wordstack_t)) == -1)
+    {
+        perror("munmap");
+        exit(EXIT_FAILURE);
+    }
+
+    close(fd);
 
     printf("Pila de palabras eliminada.\n");
 }

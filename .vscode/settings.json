@@ -10,6 +10,8 @@
         "defs.h": "c",
         "memlayout.h": "c",
         "param.h": "c",
-        "spinlock.h": "c"
+        "spinlock.h": "c",
+        "unistd.h": "c",
+        "mman.h": "c"
     }
 }
