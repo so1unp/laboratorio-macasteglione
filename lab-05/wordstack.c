@@ -100,12 +100,6 @@ void borrar_pila(const char *name)
         exit(EXIT_FAILURE);
     }
 
-    if (shm_unlink(name) == -1)
-    {
-        perror("shm_unlink");
-        exit(EXIT_FAILURE);
-    }
-
     sem_destroy(&stack->full);
     sem_destroy(&stack->empty);
     pthread_mutex_destroy(&stack->mutex);
@@ -117,6 +111,12 @@ void borrar_pila(const char *name)
     }
 
     close(fd);
+
+    if (shm_unlink(name) == -1)
+    {
+        perror("shm_unlink");
+        exit(EXIT_FAILURE);
+    }
 
     printf("Pila de palabras eliminada.\n");
 }
