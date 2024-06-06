@@ -2,6 +2,7 @@ struct stat;
 struct rtcdate;
 
 // system calls
+int pgcnt(void);
 int pscnt(void);
 int getppid(void);
 int answer(void);
