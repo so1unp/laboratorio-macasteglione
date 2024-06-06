@@ -74,7 +74,7 @@ static void *consumer(void *p)
 
         pthread_mutex_unlock(&params->mutex);
         sem_post(&params->vacio);
-        
+
         usleep(rand() % params->wait_prod);
     }
 
@@ -175,6 +175,6 @@ int main(int argc, char **argv)
     sem_destroy(&params->vacio);
     sem_destroy(&params->lleno);
     pthread_mutex_destroy(&params->mutex);
-    
+
     pthread_exit(NULL);
 }

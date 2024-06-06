@@ -244,6 +244,4 @@ int main(int argc, char *argv[])
         access_page(pid, page, algorithm);
 
     print_memory_state();
-
-    exit(EXIT_SUCCESS);
 }
