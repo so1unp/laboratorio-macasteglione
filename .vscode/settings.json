@@ -12,6 +12,8 @@
         "param.h": "c",
         "spinlock.h": "c",
         "unistd.h": "c",
-        "mman.h": "c"
+        "mman.h": "c",
+        "time.h": "c",
+        "fcntl.h": "c"
     }
 }
