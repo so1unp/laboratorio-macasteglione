@@ -41,24 +41,7 @@ int main(int argc, char *argv[])
 
     // Esta condicion esta presente para evitar el warning que dice que sync no esta siendo usada.
     // Se puede eliminar cuando se implemente fsync() y fdatasync()
-    //sync = sync == 1 ? 0 : 1;
-
-    switch (sync)
-    {
-    case 0:
-        break;
-
-    case 1:
-        fsync(fd);
-        break;
-
-    case 2:
-        fdatasync(fd);
-        break;
-
-    default:
-        break;
-    }
+    // sync = sync == 1 ? 0 : 1;
 
     for (totWritten = 0; totWritten < numBytes; totWritten += thisWrite)
     {
@@ -69,6 +52,23 @@ int main(int argc, char *argv[])
             perror("write");
             exit(EXIT_FAILURE);
         }
+
+        if (sync == 1)
+        {
+            if (fsync(fd) == -1)
+            {
+                perror("fsync");
+                exit(EXIT_FAILURE);
+            }
+        }
+        else if (sync == 2)
+        {
+            if (fdatasync(fd) == -1)
+            {
+                perror("fdatasync");
+                exit(EXIT_FAILURE);
+            }
+        }
     }
 
     if (close(fd) == -1)
@@ -77,8 +77,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    clock_t fin = clock();
+    free(buf);
 
+    clock_t fin = clock();
     float tiempoEjecucion = (float)(fin - inicio) / CLOCKS_PER_SEC;
     printf("%f\n", tiempoEjecucion);
 
